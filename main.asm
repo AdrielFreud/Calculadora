@@ -1,16 +1,16 @@
-; AdrielFreud
+; Adriel Freud
 
 section .data
-   first DB 0x0a, "Digite um número: "
+   first DB 0x0a, "[!] Digite um número: "
    len_f equ $-first
 
-   second DB "Digite o segundo número: "
+   second DB "[!] Digite o segundo número: "
    len_s equ $-second
 
-   result DB "Resultado: "
+   result DB "[+] Resultado: "
    len_r equ $-result
 
-   msg_exit DB " ", 0xa
+   msg_exit DB "", 0xa, 0xa
    len_exit equ $-msg_exit
 
 section .bss
@@ -24,8 +24,8 @@ section .text
 sair:
    mov eax, 4
    mov ebx, 1
-   mov edx, msg_exit
-   mov ecx, len_exit
+   mov edx, len_exit
+   mov ecx, msg_exit
    int 80h
 
    mov eax, 1
@@ -66,7 +66,7 @@ _start:
    mov al, [primeiro]
    sub bl, '0'
    add al, bl
-   mov [resultado], al 
+   mov [resultado], al
 
    mov ecx, resultado
    mov edx, 2
