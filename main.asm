@@ -1,3 +1,5 @@
+; AdrielFreud
+
 section .data
    first DB 0x0a, "Digite um número: "
    len_f equ $-first
