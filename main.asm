@@ -7,24 +7,28 @@ STDIN     equ 0
 STDOUT    equ 1
 
 segment .data
-	display_msg db 0xa, " Calculator by Adriel ", 0xa ,0xa
+	display_msg db 0xa, " Calculator by Adriel ", 0xa, 0xa
 	len_display equ $-display_msg
 
 	first db "[+] Primeiro Numero: "
 	len_f equ $-first
 
-	second db 0xa, "[+] Segundo Numero: "
+	second db "[+] Segundo Numero: "
 	len_s equ $-second
 
-	resultado db 0xa, "[!] The sum is: "
-	len_r equ $-resultado
+	resultado_som db 0xa, "[!] Adicao: "
+	len_sm equ $-resultado_som
 
-	last db 0xa, 0xa, " ", 0xa, 0xd
+	resultado_mult db 0xa, "[!] Multiplicação: "
+	len_mt equ $-resultado_mult
+
+	space db 0xa, 0xa, " ", 0xa, 0xd
 
 segment .bss
 	num1 resb 2
 	num2 resb 2
-	result resb 1
+	res_soma resb 1
+	res_mult resb 1
 
 section	.text
 	global _start
@@ -60,12 +64,18 @@ _start:
 	mov edx, 2
 	int 80h
 
+	call soma
+	call mult
+	call quebra_linha
+	call exit
+
+soma:
 	mov eax, SYS_WRITE
 	mov ebx, STDOUT
-	mov ecx, resultado
-	mov edx, len_r
-	int 80h
-
+	mov ecx, resultado_som
+	mov edx, len_sm
+	int 0x80
+	
 	; move o primeiro numero para eax, e o segundo para ebx
 	; subtrai pelo caracter ascii '0' e converte para decimal
 
@@ -76,26 +86,45 @@ _start:
 	add eax, ebx
 	add eax, '0'
 
-	; Quarda a soma na variavel alocada, chamada result
-	mov [result], eax
+	; Quarda a soma na variavel alocada, chamada res_soma
+	mov [res_soma], eax
 
-   	; mostra o resultado contido em result
+   	; mostra o resultado contido em res_soma
 	mov eax, SYS_WRITE
 	mov ebx, STDOUT
-	mov ecx, result
+	mov ecx, res_soma
 	mov edx, 1
 	int 80h
 
+mult:
 	mov eax, SYS_WRITE
 	mov ebx, STDOUT
-	mov ecx, last
-	mov edx, 1
+	mov ecx, resultado_mult
+	mov edx, len_mt
 	int 80h
+
+	mov	al, [num1]
+	sub al, '0'
+	mov bl, [num2]
+	sub bl, '0'
+	mul bl
+	add	al, '0'
+	mov [res_mult], al
 	
-	call exit
+	mov	ecx, res_mult
+	mov	edx, 1
+	mov	ebx, STDOUT
+	mov	eax, SYS_WRITE
+	int	80h
+
+quebra_linha:
+	mov eax, SYS_WRITE
+	mov ebx, STDOUT
+	mov ecx, space
+	mov edx, 1
+	int 80h
 
 exit:
-
 	mov eax, SYS_EXIT
 	xor ebx, ebx
 	int 80h
