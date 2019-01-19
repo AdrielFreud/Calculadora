@@ -1,77 +1,99 @@
 ; Adriel Freud
 
-section .data
-   first DB 0x0a, "[!] Digite um número: "
-   len_f equ $-first
+SYS_EXIT  equ 1
+SYS_READ  equ 3
+SYS_WRITE equ 4
+STDIN     equ 0
+STDOUT    equ 1
 
-   second DB "[!] Digite o segundo número: "
-   len_s equ $-second
+segment .data
+	display_msg db 0xa, " Calculator by Adriel ", 0xa ,0xa
+	len_display equ $-display_msg
 
-   result DB "[+] Resultado: "
-   len_r equ $-result
+	first db "[+] Primeiro Numero: "
+	len_f equ $-first
 
-   msg_exit DB "", 0xa, 0xa
-   len_exit equ $-msg_exit
+	second db 0xa, "[+] Segundo Numero: "
+	len_s equ $-second
 
-section .bss
-   primeiro RESB 5
-   resultado RESB 5
-   segundo RESB 5
+	resultado db 0xa, "[!] The sum is: "
+	len_r equ $-resultado
 
-section .text
-   global _start
+	last db 0xa, 0xa, " ", 0xa, 0xd
 
-sair:
-   mov eax, 4
-   mov ebx, 1
-   mov edx, len_exit
-   mov ecx, msg_exit
-   int 80h
+segment .bss
+	num1 resb 2
+	num2 resb 2
+	result resb 1
 
-   mov eax, 1
-   int 80h
+section	.text
+	global _start
 
 _start:
-   mov edx, len_f
-   mov ecx, first
-   mov eax, 4
-   mov ebx, 1
-   int 80h
+	mov eax, SYS_WRITE
+	mov ebx, STDOUT
+	mov ecx, display_msg
+	mov edx, len_display
+	int 80h
 
-   mov eax, 3
-   mov ebx, 2
-   mov edx, 2
-   mov ecx, primeiro
-   int 80h
+	mov eax, SYS_WRITE
+	mov ebx, STDOUT
+	mov ecx, first
+	mov edx, len_f
+	int 80h
 
-   mov edx, len_s
-   mov ecx, second
-   mov eax, 4
-   mov ebx, 1
-   int 80h
+	mov eax, SYS_READ
+	mov ebx, STDIN
+	mov ecx, num1
+	mov edx, 2
+	int 80h
 
-   mov eax, 3
-   mov ebx, 2
-   mov edx, 2
-   mov ecx, segundo
-   int 80h
+	mov eax, SYS_WRITE
+	mov ebx, STDOUT
+	mov ecx, second
+	mov edx, len_s
+	int 80h
 
-   mov edx, len_r
-   mov ecx, result
-   mov eax, 4
-   mov ebx, 1
-   int 80h
+	mov eax, SYS_READ
+	mov ebx, STDIN
+	mov ecx, num2
+	mov edx, 2
+	int 80h
 
-   mov bl, [segundo]
-   mov al, [primeiro]
-   sub bl, '0'
-   add al, bl
-   mov [resultado], al
+	mov eax, SYS_WRITE
+	mov ebx, STDOUT
+	mov ecx, resultado
+	mov edx, len_r
+	int 0x80
 
-   mov ecx, resultado
-   mov edx, 2
-   mov eax, 4
-   mov ebx, 1
-   int 80h
+	; move o primeiro numero para eax, e o segundo para ebx
+	; subtrai pelo caracter ascii '0' e converte para decimal
 
-   call sair
+	mov eax, [num1]
+	sub eax, '0'
+	mov ebx, [num2]
+	sub ebx, '0'
+	add eax, ebx
+	add eax, '0'
+
+	; Quarda a soma na variavel alocada, chamada result
+	mov [result], eax
+
+   	; mostra o resultado contido em result
+	mov eax, SYS_WRITE
+	mov ebx, STDOUT
+	mov ecx, result
+	mov edx, 1
+	int 80h
+
+	mov eax, SYS_WRITE
+	mov ebx, STDOUT
+	mov ecx, last
+	mov edx, 1
+	int 80h
+
+exit:
+
+	mov eax, SYS_EXIT
+	xor ebx, ebx
+	int 80h
