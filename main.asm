@@ -91,6 +91,8 @@ _start:
 	mov ecx, last
 	mov edx, 1
 	int 80h
+	
+	call exit
 
 exit:
 
