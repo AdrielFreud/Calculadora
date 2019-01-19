@@ -64,7 +64,7 @@ _start:
 	mov ebx, STDOUT
 	mov ecx, resultado
 	mov edx, len_r
-	int 0x80
+	int 80h
 
 	; move o primeiro numero para eax, e o segundo para ebx
 	; subtrai pelo caracter ascii '0' e converte para decimal
