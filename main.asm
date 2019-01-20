@@ -10,17 +10,20 @@ segment .data
 	display_msg db 0xa, " Calculator by Adriel ", 0xa, 0xa
 	len_display equ $-display_msg
 
-	first db "[+] Primeiro Numero: "
+	first db "[!] Primeiro Numero: "
 	len_f equ $-first
 
-	second db "[+] Segundo Numero: "
+	second db "[!] Segundo Numero: "
 	len_s equ $-second
 
-	resultado_som db 0xa, "[!] Adicao: "
+	resultado_som db 0xa, "[+] Adicao: "
 	len_sm equ $-resultado_som
 
-	resultado_mult db 0xa, "[!] Multiplicação: "
+	resultado_mult db 0xa, "[*] Multiplicação: "
 	len_mt equ $-resultado_mult
+
+	resultado_div db 0xa, "[/] Divisao: "
+	len_div equ $-resultado_div
 
 	space db 0xa, 0xa, " ", 0xa, 0xd
 
@@ -29,6 +32,7 @@ segment .bss
 	num2 resb 2
 	res_soma resb 1
 	res_mult resb 1
+	res_div resb 1
 
 section	.text
 	global _start
@@ -65,7 +69,8 @@ _start:
 	int 80h
 
 	call soma
-	call mult
+	call multiplicacao
+	call divisao
 	call quebra_linha
 	call exit
 
@@ -74,7 +79,7 @@ soma:
 	mov ebx, STDOUT
 	mov ecx, resultado_som
 	mov edx, len_sm
-	int 0x80
+	int 80h
 	
 	; move o primeiro numero para eax, e o segundo para ebx
 	; subtrai pelo caracter ascii '0' e converte para decimal
@@ -96,7 +101,7 @@ soma:
 	mov edx, 1
 	int 80h
 
-mult:
+multiplicacao:
 	mov eax, SYS_WRITE
 	mov ebx, STDOUT
 	mov ecx, resultado_mult
@@ -116,6 +121,28 @@ mult:
 	mov	ebx, STDOUT
 	mov	eax, SYS_WRITE
 	int	80h
+
+divisao:
+	mov eax, SYS_WRITE
+	mov ebx, STDOUT
+	mov ecx, resultado_div
+	mov edx, len_div
+	int 80h
+
+	mov al, [num1]
+	sub al, '0'
+	mov bl, [num2]
+	sub bl, '0'
+	div bl
+	add al, '0'
+	mov [res_div], al
+
+	mov eax, SYS_WRITE
+	mov ebx, STDOUT
+	mov ecx, res_div
+	mov edx, 1
+	int 80h
+
 
 quebra_linha:
 	mov eax, SYS_WRITE
