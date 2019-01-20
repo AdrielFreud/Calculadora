@@ -25,14 +25,19 @@ segment .data
 	resultado_div db 0xa, "[/] Divisao: "
 	len_div equ $-resultado_div
 
+	resultado_sub db 0xa, "[-] Subtracao: "
+	len_sub equ $-resultado_sub
+
 	space db 0xa, 0xa, " ", 0xa, 0xd
 
 segment .bss
 	num1 resb 2
 	num2 resb 2
+
 	res_soma resb 1
 	res_mult resb 1
 	res_div resb 1
+	res_sub resb 1
 
 section	.text
 	global _start
@@ -71,6 +76,7 @@ _start:
 	call soma
 	call multiplicacao
 	call divisao
+	call subtracao
 	call quebra_linha
 	call exit
 
@@ -142,6 +148,29 @@ divisao:
 	mov ecx, res_div
 	mov edx, 1
 	int 80h
+
+subtracao:
+	mov eax, SYS_WRITE
+	mov ebx, STDOUT
+	mov ecx, resultado_sub
+	mov edx, len_sub
+	int 80h
+
+	mov	al, [num1]
+	;sub al, '0'
+	
+	mov bl, [num2]
+	;sub bl, '0'
+	
+	sub al, bl
+	add	al, '0'
+	mov [res_sub], al
+	
+	mov	ecx, res_sub
+	mov	edx, 1
+	mov	ebx, STDOUT
+	mov	eax, SYS_WRITE
+	int	80h
 
 
 quebra_linha:
